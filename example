@@ -1,0 +1,123 @@
+#include<stdlib.h>
+#include<stdio.h>
+# include <iostream>  //需告才能用 using namespace std; 
+
+using namespace std; //宣告才能用 cout
+int g=0;//EX5: call by pointer to pointer
+int main(){
+	void swap1(int&,int&);//call by reference，此處的&是reference不是取址符
+	void swap2(int*,int*);//call by address
+	void swap3(int,int);//call by value
+	void changePtr1(int* );//EX5-1
+	void changePtr2(int** );//EX5-2
+	void changePtr3(int*&);//EX5-3，此處的&是reference不是取址符
+	
+	//配置、釋放記憶體
+	size_t s=5;
+	int* ar = (int*) malloc(s*sizeof(int));//c用malloc、free，c++用new配置記憶體、delete
+	free(ar);
+
+	//宣告指標陣列
+	int* ptr;
+	#define k 3//這邊一定要用define，如果用int 宣告會報錯
+	int arr[k]; 
+	ptr = arr; //c++這邊會自動將陣列型別轉換成第一位位址，c則需要寫成 ptr = &arr
+	cout << ptr << endl;
+
+	//---------------------------------------------------------------------------
+	//指標=> &:1.取址符、2.C++的reference. *:1.取值符、2.宣告指標變數用
+
+	//EX1:
+	int a=3;
+	int* p1=&a; //此時的p1代表a的位址(此時的*代表宣告指標變數用，&為取址
+	printf("*a=%d\t*p1=%d\n",a,*p1);
+	a=7;
+	printf("*a=%d\t*p1=%d\n",a,*p1);
+	*p1=5;
+	printf("*a=%d\t*p1=%d\n",a,*p1);
+	printf("-----------------\n");
+	//EX2 ~ EX4:
+	int x=5,y=8;
+ 	printf("未進swap0前x=%d\ty=%d\n",x,y);
+	swap1(x,y);//EX2: call by reference，輸入為一般變數
+	printf("call by reference後 x=%d\ty=%d 會變\n",x,y);
+	printf("\n");
+	printf("未進swap1前x=%d\ty=%d\n",x,y);
+	swap2(&x,&y);//EX3: call by address，輸入為位址
+	printf("call by address後 x=%d\ty=%d 會變\n",x,y);
+	printf("\n");
+	printf("未進swap2前x=%d\ty=%d\n",x,y);
+	swap3(x,y);//EX4: call by value，輸入為一般變數
+	printf("call by value後 x=%d\ty=%d 不變\n",x,y);
+	printf("\n");
+	printf("-----------------\n");
+	//EX5-0: call by pointer to pointer，實際改變變數的位址(單一指標*改變的是變數的值)
+	int l=1;
+	int* lptr=&l;
+	printf("lptr這個位址當前的值=%d與l當前位址=%d相等\n",lptr,&l);
+
+	printf("改之前l=%d，&l=%d，*lptr=%d，lptr=%d\n",l,&l,*lptr,lptr);
+	changePtr1(lptr);//此範例只是"複製"一份g的位址傳給函式的引數pInt而已，並沒有實際修改
+	printf("改之後l=%d，&l=%d，*lptr=%d，lptr=%d\n",l,&l,*lptr,lptr);
+	printf("\n");
+	//因函式內長像為pInt = &g;，如果要達到更改目的，應該要像EX3內*m = *n;樣式有*(*pInt = &g;)
+	//正確改法要用(int** 或 int*&)如下:
+	
+	//EX5-1
+	printf("改之前l=%d,*lptr=%d,此時l的位址=%d,lptr這個位址=%d\n",l,*lptr,&l,lptr);
+	changePtr2(&lptr);//輸入應為位址的位址
+	printf("改之後l=%d,*lptr=%d,此時l的位址=%d,lptr這個位址=%d\n",l,*lptr,&l,lptr);
+	//把g的位址傳給l的位址的位址(lptr的位址)
+	printf("此時l的位址=%d不變、l值也不變,但lptr被改成g的=%d\n",&l,lptr);
+	printf("所以lptr目前已經不再指向l了，而是改轉指向g，被g拿去用的感覺\n");
+	printf("最終，l維持不變，但*lptr變了\n");
+	printf("\n");
+	
+	//EX5-2，因為前面例子lptr被g拿去用了，要重新宣告一個
+	int* lptr2=&l;
+	printf("改之前l=%d，&l=%d，*lptr2=%d，lptr2=%d\n",l,&l,*lptr2,lptr2);
+	changePtr3(lptr2);//輸入型別為[指標]，因此時為[指標的參考]，EX2為[變數參考]，所以輸入[變數]
+	printf("改之後l=%d，&l=%d，*lptr2=%d，lptr2=%d\n",l,&l,*lptr2,lptr2);
+	printf("lptr2也被g拿去用了，目前lptr2指向g\n");
+	printf("最終，l維持不變，但*lptr2變了\n");
+	printf("\n");
+	printf("!!總而言之pointer to pointer 或 reference to pointer並不會改變原變數的值，但會改變原變數指標方向\n");
+	printf("\n");
+	printf("-----------------\n");
+
+	system ("pause");
+	return 0;
+}
+	
+	//EX2: call by reference (C++才有這個用法)
+	void swap1(int &m,int &n){ //會直接對輸入的值做修改!!
+		int t =m;
+		m=n;
+		n=t;
+	}
+	//EX3: call by address
+	void swap2(int* m,int* n){
+		int t =*m;
+		*m=*n;
+		*n=t;
+	}
+	//EX4: call by value
+	void swap3(int m,int n){
+		int t =m;
+		m=n;
+		n=t;
+	}
+	//EX5-0: call by pointer to pointer(對指標的指標做變更，也就是實際更改變數的位址，非對變數改變)
+	void changePtr1(int* pInt){//只是複製g的位址給函式
+		pInt = &g;
+	}
+	//EX5-1
+	void changePtr2(int** pInt){//*pInt動作，則是改變了位址的位址
+		*pInt = &g;
+		printf("g位址=%d\n",&g);
+	}
+	//EX5-2
+	void changePtr3(int*& pInt){//*pInt動作，則是改變了位址的位址
+		pInt = &g;
+		printf("g位址=%d\n",&g);
+	}
