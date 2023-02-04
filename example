@@ -20,8 +20,12 @@ int main(){
 	//宣告指標陣列
 	int* ptr;
 	#define k 3//這邊一定要用define，如果用int 宣告會報錯
-	int arr[k]; 
-	ptr = arr; //c++這邊會自動將陣列型別轉換成第一位位址，c則需要寫成 ptr = &arr
+	int arr[k]={0}; 
+	ptr = arr; //c++會自動將陣列型別轉換成第一位位址，將arr第一位位址傳給ptr，c則需要寫成 ptr = &arr
+	*(ptr+1)=1;//這邊*(ptr+1)其實就等於arr[1]也等於ptr[1]
+	for (int i=0; i<k; i++){
+		printf("*ptr%d=%d,arr[%d]=%d也等於ptr[%d]=%d\n",i,*(ptr+i),i,arr[i],i,ptr[i]);
+	}  
 	cout << ptr << endl;
 
 	//---------------------------------------------------------------------------
